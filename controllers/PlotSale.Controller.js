@@ -7,10 +7,10 @@ const path = require("path");
 // Create a new plot sale with image upload
 const createPlotSale = async (req, res) => {
   try {
-    const { name, cnic, phoneNo, price, monthlyInstallment } = req.body;
+    const { name, cnic, phoneNo, totalPrice, monthlyInstallment } = req.body;
 
     // Check if the required fields are provided
-    if (!name || !cnic || !phoneNo || !price || !monthlyInstallment) {
+    if (!name || !cnic || !phoneNo || !totalPrice || !monthlyInstallment) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -21,8 +21,10 @@ const createPlotSale = async (req, res) => {
       phoneNo,
       // cnicImage: `http://localhost:${process.env.PORT}/cnicImage/${req.file.path}`,
       cnicImage: req.file.path,
-      price,
+      totalPrice,
+      restAmount: totalPrice,
       monthlyInstallment,
+      totalInstallments: totalPrice / monthlyInstallment,
     });
 
     // Save the plot sale to the database
@@ -79,9 +81,24 @@ const updatePlotSaleById = async (req, res) => {
     plotSale.name = req.body.name || plotSale.name;
     plotSale.cnic = req.body.cnic || plotSale.cnic;
     plotSale.phoneNo = req.body.phoneNo || plotSale.phoneNo;
-    plotSale.price = req.body.price || plotSale.price;
-    plotSale.monthlyInstallment =
-      req.body.monthlyInstallment || plotSale.monthlyInstallment;
+    // plotSale.totalPrice = req.body.totalPrice || plotSale.totalPrice;
+    // Monthly Installment
+    // plotSale.monthlyInstallment =
+    //   req.body.monthlyInstallment || plotSale.monthlyInstallment;
+
+    // Total Installments
+    // plotSale.totalInstallments =
+    // plotSale.totalInstallments !==
+    // plotSale.totalPrice / plotSale.monthlyInstallment
+    //   ? plotSale.totalInstallments
+    //   : plotSale.totalPrice / plotSale.monthlyInstallment;
+
+    // Rest Amount
+    // plotSale.restAmount =
+    //   plotSale.totalPrice -
+    //   (plotSale.totalPrice / plotSale.monthlyInstallment -
+    //     plotSale.totalInstallments) *
+    //     plotSale.monthlyInstallment;
 
     // Update the image path
     if (req.file) {
@@ -113,10 +130,39 @@ const deletePlotSaleById = async (req, res) => {
   }
 };
 
+// Submit Installment
+const submitInstallmentById = async (req, res) => {
+  try {
+    const plotSale = await PlotSaleModel.findById(req.params.id);
+    if (plotSale) {
+      if (plotSale.totalInstallments > 0) {
+        plotSale.submitInstallment = true;
+        plotSale.totalInstallments = plotSale.totalInstallments - 1;
+        plotSale.restAmount -= plotSale.monthlyInstallment;
+
+        await plotSale.save();
+
+        res
+          .status(200)
+          .json({ success: 1, message: "Installment Submitted Successfully" });
+      } else {
+        res.status(200).json({
+          success: false,
+          message: "You Already Submit All Installments!",
+        });
+      }
+    } else {
+      res.status(500).json({ success: 0, message: "ID not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ success: 0, message: error.message });
+  }
+};
 module.exports = {
   createPlotSale,
   getAllPlotSales,
   getPlotSaleById,
   updatePlotSaleById,
   deletePlotSaleById,
+  submitInstallmentById,
 };

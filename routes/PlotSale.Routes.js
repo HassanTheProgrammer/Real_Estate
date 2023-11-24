@@ -21,4 +21,10 @@ router.post(
 );
 
 router.delete("/deletePlotSaleById/:id", plotSaleController.deletePlotSaleById);
+
+router.patch(
+  "/submitInstallmentById/:id",
+  plotSaleController.submitInstallmentById
+);
+
 module.exports = router;

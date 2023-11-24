@@ -18,14 +18,25 @@ const PlotSaleSchema = new mongoose.Schema(
       type: String,
       requried: true,
     },
-    price: {
-      type: String,
+    totalPrice: {
+      type: Number,
       required: true,
     },
+    restAmount: {
+      type: Number,
+    },
     monthlyInstallment: {
-      type: String,
+      type: Number,
       requried: true,
     },
+    totalInstallments: {
+      type: Number,
+      default: 0
+    },
+    submitInstallment: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
