@@ -1,3 +1,4 @@
+const { response } = require("express");
 const PlotSaleModel = require("../models/PlotSale.Model");
 // const multer = require("multer");
 const path = require("path");
@@ -9,26 +10,37 @@ const createPlotSale = async (req, res) => {
   try {
     const { name, cnic, phoneNo, totalPrice, monthlyInstallment } = req.body;
 
-    // Check if the required fields are provided
+    // check empty input fields
     if (!name || !cnic || !phoneNo || !totalPrice || !monthlyInstallment) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Create a new plot sale
-    const newPlotSale = new PlotSaleModel({
-      name,
-      cnic,
-      phoneNo,
-      // cnicImage: `http://localhost:${process.env.PORT}/cnicImage/${req.file.path}`,
-      cnicImage: req.file.path,
-      totalPrice,
-      restAmount: totalPrice,
-      monthlyInstallment,
-      totalInstallments: totalPrice / monthlyInstallment,
-    });
+    // check dublicat CNIC
+    if (await PlotSaleModel.findOne({ cnic })) {
+      return res.status(400).json({ success: false, message: "cnic already exists" })
+    } else {
+      try {
+        // Create a new plot sale
+        await PlotSaleModel.create({
+          name,
+          cnic,
+          phoneNo,
+          cnicImage: req.file.path,
+          totalPrice,
+          restAmount: totalPrice,
+          monthlyInstallment,
+          totalInstallments: totalPrice / monthlyInstallment,
+        });
+        res.status(200).json({ success: true, message: "plot sale created successfully" })
+      } catch (error) {
+        res.status(400).json({
+          success: false,
+          messag: error.message
+        })
+      }
+    }
 
-    // Save the plot sale to the database
-    const savedPlotSale = await newPlotSale.save();
+
 
     res.status(201).json(savedPlotSale);
     // });

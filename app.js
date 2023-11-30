@@ -7,7 +7,7 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT;
 
-require("./connect");
+require("./config/db.config.JS");
 
 // Middlewares
 app.use(express.json());
