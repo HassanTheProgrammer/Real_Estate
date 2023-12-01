@@ -14,10 +14,11 @@ const PlotSaleSchema = new mongoose.Schema(
       type: String,
       requried: true,
     },
-    cnicImage: {
-      type: String,
-      requried: true,
-    },
+    files: [
+      {
+        type: String,
+      },
+    ],
     totalPrice: {
       type: Number,
       required: true,
@@ -31,12 +32,12 @@ const PlotSaleSchema = new mongoose.Schema(
     },
     totalInstallments: {
       type: Number,
-      default: 0
+      default: 0,
     },
     submitInstallment: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   { timestamps: true }
 );

@@ -7,6 +7,7 @@ const path = require("path");
 
 // Create a new plot sale with image upload
 const createPlotSale = async (req, res) => {
+  let files = [];
   try {
     const { name, cnic, phoneNo, totalPrice, monthlyInstallment } = req.body;
 
@@ -14,10 +15,15 @@ const createPlotSale = async (req, res) => {
     if (!name || !cnic || !phoneNo || !totalPrice || !monthlyInstallment) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
+    for (let file of req.files.uploads) {
+      files.push(file.path);
+      console.log(file);
+    }
     // check dublicat CNIC
     if (await PlotSaleModel.findOne({ cnic })) {
-      return res.status(400).json({ success: false, message: "cnic already exists" })
+      return res
+        .status(400)
+        .json({ success: false, message: "cnic already exists" });
     } else {
       try {
         // Create a new plot sale
@@ -25,22 +31,22 @@ const createPlotSale = async (req, res) => {
           name,
           cnic,
           phoneNo,
-          cnicImage: req.file.path,
+          files,
           totalPrice,
           restAmount: totalPrice,
           monthlyInstallment,
           totalInstallments: totalPrice / monthlyInstallment,
         });
-        res.status(200).json({ success: true, message: "plot sale created successfully" })
+        res
+          .status(200)
+          .json({ success: true, message: "plot sale created successfully" });
       } catch (error) {
         res.status(400).json({
           success: false,
-          messag: error.message
-        })
+          messag: error.message,
+        });
       }
     }
-
-
 
     res.status(201).json(savedPlotSale);
     // });

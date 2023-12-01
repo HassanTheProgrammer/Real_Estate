@@ -7,7 +7,13 @@ const router = express.Router();
 // Route to create a new plot sale with image upload
 router.post(
   "/createPloatSale",
-  upload.single("cnicImage"),
+  // upload.single("cnicImage"),
+  upload.fields([
+    {
+      name: "uploads",
+      maxCount: 5,
+    },
+  ]),
   plotSaleController.createPlotSale
 );
 
@@ -16,7 +22,7 @@ router.get("/getPlotSaleById/:id", plotSaleController.getPlotSaleById);
 
 router.post(
   "/updatePloatSaleById/:id",
-  upload.single("cnicImage"),
+  upload.single("images"),
   plotSaleController.updatePlotSaleById
 );
 
